@@ -1,0 +1,29 @@
+{
+  "name": "shoppygo/marketplaceshipping",
+  "description": "Shipping",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Luigi Massa",
+      "email": "lmassa@bwlab.it"
+    }
+  ],
+  "type": "prestashop-module",
+  "config": {
+    "vendor-dir": "vendor/",
+    "preferred-install": "dist",
+    "prepend-autoloader": false
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@gitlab.com:bwlab/bwplatformwidget.git"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Shoppygo\\Marketplace\\": "../shoppygomarketplace/src/"
+    }
+  }
+}

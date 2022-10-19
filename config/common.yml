@@ -1,0 +1,12 @@
+services:
+  _defaults:
+    public: true
+
+  shoppygo_marketplace_prestashop_context:
+    class: 'PrestaShop\Module\PrestashopCheckout\Context\PrestaShopContext'
+    public: true
+
+#  shoppygo_core_marketplace_front:
+#    class: Shopp\Marketplace\Classes\MarketplaceCoreFront
+#    arguments:
+#      [ '@doctrine', '@shoppygo_marketplace_prestashop_context' ]
