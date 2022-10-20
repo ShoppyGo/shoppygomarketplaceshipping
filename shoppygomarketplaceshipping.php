@@ -51,9 +51,7 @@ class Shoppygomarketplaceshipping extends CarrierModule
         $this->author = 'Bwlab';
         $this->need_instance = 0;
 
-        /*
-         * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
-         */
+
         $this->bootstrap = true;
 
         parent::__construct();
@@ -74,8 +72,6 @@ class Shoppygomarketplaceshipping extends CarrierModule
      */
     public function getOrderShippingCost($params, $shipping_cost)
     {
-        // in quanto il metodo getPackageShippingCost esiste, questo metodo non viene richiamato
-        // forse per compatibilità con il passato
         throw new \Exception('modulo spediione: richiamato il metodo getOrderShippingCost, ma non doveva essere');
     }
 
@@ -88,7 +84,6 @@ class Shoppygomarketplaceshipping extends CarrierModule
      */
     public function getOrderShippingCostExternal($params)
     {
-        // richiamato solo se il carrir $carrier->need_range, ma non deve
         throw new \Exception(
             'modulo spediione: richiamato il metodo getOrderShippingCostExternal, ma non doveva essere'
         );
@@ -102,7 +97,7 @@ class Shoppygomarketplaceshipping extends CarrierModule
      * @return int
      */
     public function getPackageShippingCost($params, $shipping_cost,  $products)
-    {xdebug_break();
+    {
         $service = $this->getMarketplaceFront();
         self::$cost_for_seller = $service->getTotalShippingBySeller($products);
         $total = 0;
@@ -130,27 +125,15 @@ class Shoppygomarketplaceshipping extends CarrierModule
     public function hookDisplayAfterCarrier($params)
     {
         //
-        // questo _hook_ viene richiamato nel template
+        // colled in  template
         //  themes/classic/templates/checkout/_partials/steps/shipping.tpls
-        //
-        // serve a stampare una tabella con il totale dei costi degli spedizionieri
-        // per stampare il totale della spedizione servirsi di self::$riepilogo_costi_spedizione che dovrebbe essere
-        //  compilato dal metodo getPackageShippingCost
-        // $params è array che contiene:
-        //  cart => oggetto CartCore()
-        // cookie => oggetto Cookie()
-        // altern => 1   --> ??????
-        //
-//        /** @var \PrestaShop\PrestaShop\Adapter\Entity\Cart $cart */
-//        $cart = $params['cart'];
-//
-//        /** @var \PrestaShop\PrestaShop\Adapter\Entity\Cookie $cookie */
-//        $cookie = $params['cookie'];
+        // print a table with seller shipping costs
+        // to print use self::$riepilogo_costi_spedizione compiled from method getPackageShippingCost
 
         $service = $this->getMarketplaceFront();
         $cost_list = [];
-        foreach (self::$cost_for_seller as $seller => $cost) {
-            $name = $service->getSellerName($seller);
+        foreach (self::$cost_for_seller as $id_seller => $cost) {
+            $name = $service->getSellerName($id_seller);
 
             $cost_list[] = ['seller_name' => $name, 'total' => $cost];
         }
@@ -172,7 +155,7 @@ class Shoppygomarketplaceshipping extends CarrierModule
                 }
             }
 
-            if (!$this->createCarriers()) { //function for creating new currier
+            if (!$this->createCarriers()) { //new carrier
                 return false;
             }
 
@@ -203,12 +186,6 @@ class Shoppygomarketplaceshipping extends CarrierModule
 
     protected function createCarriers()
     {
-        // controllare la documentazione # check http://doc.prestashop.com/display/PS16/Creating+a+carrier+module
-        // ed anche  https://belvg.com/blog/how-to-create-shipping-module-for-prestashop.html
-        //
-        // crezione del carrier base e unico per il marketpace in quanto tutta la logica è gestita dal metodo di calcolo
-        // costo dell spedizione
-        //
         $carrier = new Carrier();
         $carrier->name = 'marketplace';
         $carrier->active = true;
