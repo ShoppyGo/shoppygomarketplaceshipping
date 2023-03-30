@@ -48,18 +48,21 @@ class Shoppygomarketplaceshipping extends CarrierModule
         $this->name = 'shoppygomarketplaceshipping';
         $this->tab = 'shipping_logistics';
         $this->version = '1.0.0';
-        $this->author = 'Bwlab';
+        $this->author = 'ShoppyGo';
         $this->need_instance = 0;
-
 
         $this->bootstrap = true;
 
         parent::__construct();
 
-        $this->displayName = $this->l('Marketplace Shipping');
-        $this->description = $this->l('Manage the sipping of marketplace');
+        $this->displayName = $this->trans('Marketplace Shipping', [], 'Modules.Shoppygomarketplaceshipping.Admin');
+        $this->description = $this->trans(
+            'Display list of seller shipping cost in checkout',
+            [],
+            'Modules.Shoppygomarketplaceshipping.Admin'
+        );
 
-        $this->ps_versions_compliancy = ['min' => '1.7', 'max' => _PS_VERSION_];
+        $this->ps_versions_compliancy = ['min' => '8.0.0', 'max' => _PS_VERSION_];
     }
 
     /**
@@ -96,15 +99,15 @@ class Shoppygomarketplaceshipping extends CarrierModule
      *
      * @return int
      */
-    public function getPackageShippingCost($params, $shipping_cost,  $products)
+    public function getPackageShippingCost($params, $shipping_cost, $products)
     {
         $service = $this->getMarketplaceFront();
         self::$cost_for_seller = $service->getTotalShippingBySeller($products);
         $total = 0;
         array_walk(
             self::$cost_for_seller, static function (int $r) use (&$total) {
-                $total += $r;
-            }
+            $total += $r;
+        }
         );
 
         return $total;
@@ -112,8 +115,8 @@ class Shoppygomarketplaceshipping extends CarrierModule
 
     public function hookActionCarrierUpdate($params)
     {
-        if ($params['carrier']->id_reference == Configuration::get(self::PREFIX . 'swipbox_reference')) {
-            Configuration::updateValue(self::PREFIX . 'swipbox', $params['carrier']->id);
+        if ($params['carrier']->id_reference == Configuration::get(self::PREFIX.'swipbox_reference')) {
+            Configuration::updateValue(self::PREFIX.'swipbox', $params['carrier']->id);
         }
     }
 
