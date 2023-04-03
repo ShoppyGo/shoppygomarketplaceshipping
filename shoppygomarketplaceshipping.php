@@ -28,6 +28,14 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
+use PrestaShop\PrestaShop\Adapter\Presenter\Cart\CartPresenter;
+use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductListingPresenter;
+use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
+use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
+use PrestaShop\PrestaShop\Core\Product\ProductPresentationSettings;
+use ShoppyGo\MarketplaceBundle\Presenter\MarketplaceCartPresenter;
+
 class Shoppygomarketplaceshipping extends CarrierModule
 {
     public const PREFIX = 'SHOPPYGOMARKETPLACESHIPPING';
@@ -36,6 +44,7 @@ class Shoppygomarketplaceshipping extends CarrierModule
     public $id_carrier;
     protected $config_form = false;
     protected $_hooks = [
+        'displayHeader',
         'actionCarrierUpdate',
         'displayAfterCarrier',
     ];
@@ -104,7 +113,7 @@ class Shoppygomarketplaceshipping extends CarrierModule
         $service = $this->getMarketplaceFront();
         self::$cost_for_seller = $service->getTotalShippingBySeller($products);
         $total = 0;
-        array_walk(
+        array_walk_recursive(
             self::$cost_for_seller, static function (int $r) use (&$total) {
             $total += $r;
         }
@@ -135,10 +144,29 @@ class Shoppygomarketplaceshipping extends CarrierModule
 
         $service = $this->getMarketplaceFront();
         $cost_list = [];
-        foreach (self::$cost_for_seller as $id_seller => $cost) {
-            $name = $service->getSellerName($id_seller);
+        $cart_products = $this->context->cart->getProducts();
+        $seller_product = $service->getSellersProduct($cart_products);
+        $cloned_cart = clone $this->context->cart;
 
-            $cost_list[] = ['seller_name' => $name, 'total' => $cost];
+        foreach (self::$cost_for_seller as $id_seller => $cost) {
+            $seller_id_products = array_map(static function ($item) use ($id_seller) {
+                if ($item['id_seller'] == $id_seller) {
+                    return $item['id_product'];
+                }
+            }, $seller_product);
+
+            $seller_name = $service->getSellerName($id_seller);
+            $products = static function ($item) use ($seller_id_products) {
+                return in_array($item['id_product'], $seller_id_products);
+            };
+            // access protected method _products
+            $this->addProductToCart($cloned_cart, array_filter($cart_products, $products));
+
+            $cost_list[$seller_name]['carrier_costs'] = $cost;
+            $cost_list[$seller_name]['seller_products'] = (new MarketplaceCartPresenter())->present(
+                cart: $cloned_cart,
+                refresh: false
+            );
         }
         $this->smarty->assign(
             [
@@ -146,7 +174,12 @@ class Shoppygomarketplaceshipping extends CarrierModule
             ]
         );
 
-        return $this->fetch('module:shoppygomarketplaceshipping/shipping_cost_detail.tpl');
+        return $this->fetch('module:shoppygomarketplaceshipping/views/templates/hook/displayAfterCarrier.tpl');
+    }
+
+    public function hookDisplayHeader()
+    {
+        $this->context->controller->registerStylesheet($this->name.'-'.$this->version, '/view/css/shoppygo.css');
     }
 
     public function install()
@@ -218,8 +251,38 @@ class Shoppygomarketplaceshipping extends CarrierModule
         return true;
     }
 
+    private function addProductToCart(
+        ?Cart $cloned_cart,
+        array $products
+    ): void {
+        $reflector = new ReflectionClass($cloned_cart);
+        $reflector_property = $reflector->getProperty('_products');
+        $reflector_property->setAccessible(true);;
+        $reflector_property->setValue(
+            $cloned_cart,
+            $products
+        );
+        $reflector_property->setAccessible(false);
+    }
+
     private function getMarketplaceFront(): MarketplaceCoreFront
     {
         return new \MarketplaceCoreFront($this->get('doctrine'), $this->context);
+    }
+
+    private function getPresenterSettings()
+    {
+        $settings = new ProductPresentationSettings();
+
+        $settings->catalog_mode = Configuration::isCatalogMode();
+        $settings->catalog_mode_with_prices = (int)Configuration::get('PS_CATALOG_MODE_WITH_PRICES');
+        $settings->include_taxes = (new TaxConfiguration())->includeTaxes();
+        $settings->allow_add_variant_to_cart_from_listing = (int)Configuration::get('PS_ATTRIBUTE_CATEGORY_DISPLAY');
+        $settings->stock_management_enabled = Configuration::get('PS_STOCK_MANAGEMENT');
+        $settings->showPrices = Configuration::showPrices();
+        $settings->lastRemainingItems = Configuration::get('PS_LAST_QTIES');
+        $settings->showLabelOOSListingPages = (bool)Configuration::get('PS_SHOW_LABEL_OOS_LISTING_PAGES');
+
+        return $settings;
     }
 }

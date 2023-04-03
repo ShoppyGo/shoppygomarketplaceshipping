@@ -23,20 +23,27 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
 *}
 
-<table class="table table-striped table-sm">
-    <thead>
-    <tr>
-        <th scope="col">Spedito da</th>
-        <th scope="col" class="text-xl-center">Costo spedizione</th>
-    </tr>
-    </thead>
-    <tbody>
-    {foreach from=$cost_list item=row}
-        <tr>
-            <td scope="row">{$row.seller_name}</td>
-            <td class="text-xl-center">{Tools::displayPrice($row.total)}</td>
-        </tr>
+<div class="shoppygo container">
+    {foreach from=$cost_list key=seller_name  item=row}
+      <p>
+          {l s="Shipped by" d="Modules.Shoppygomarketplaceshipping.Shop"}
+        :{$seller_name}  ({$row.seller_products.summary_string})
+      </p>
+        {foreach from=$row.seller_products.products item=product}
+            {include file='module:shoppygomarketplaceshipping/views/templates/hook/_partials/cart-summary-product-line.tpl'
+            product=$product}
+        {/foreach}
+
+        {foreach from=$row['carrier_costs'] key=carrier_name item=total}
+          <p>{l s="Carrier name" d="Modules.Shoppygomarketplaceshipping.Shop"}
+              {$carrier_name}
+            - {l s="Cost" d="Modules.Shoppygomarketplaceshipping.Shop"}:
+              {Tools::displayPrice($total)}
+          </p>
+        {/foreach}
     {/foreach}
-    </tbody>
-    <caption>i costi esposti sopra sono relativi alle singole spedizioni di ogni venditore</caption>
-</table>
+</div>
+
+<caption>i costi esposti sopra sono relativi alle singole spedizioni di ogni
+  venditore
+</caption>
