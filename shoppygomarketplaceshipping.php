@@ -147,15 +147,23 @@ class Shoppygomarketplaceshipping extends CarrierModule
         $cart_products = $this->context->cart->getProducts();
         $seller_product = $service->getSellersProduct($cart_products);
         $cloned_cart = clone $this->context->cart;
-
+        $policies = [];
         foreach (self::$cost_for_seller as $id_seller => $cost) {
             $seller_id_products = array_map(static function ($item) use ($id_seller) {
                 if ($item['id_seller'] == $id_seller) {
                     return $item['id_product'];
                 }
             }, $seller_product);
-
             $seller_name = $service->getSellerName($id_seller);
+
+            if (false === array_key_exists($seller_name, $policies)) {
+                $policies[$seller_name] = $service->getMarketplaceSellerData($id_seller)
+                    ->getReturnPolicy()
+                    ?: $this->trans(
+                        'No return policy. Please contact the Marketplace Support. Thanks in advance', [],
+                        'Modules.Shoppygomarketplaceshipping.Shop'
+                    );
+            }
             $products = static function ($item) use ($seller_id_products) {
                 return in_array($item['id_product'], $seller_id_products);
             };
@@ -171,6 +179,7 @@ class Shoppygomarketplaceshipping extends CarrierModule
         $this->smarty->assign(
             [
                 'cost_list' => $cost_list,
+                'policies'  => $policies,
             ]
         );
 

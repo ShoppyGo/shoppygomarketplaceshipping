@@ -25,25 +25,36 @@
 
 <div class="shoppygo container">
     {foreach from=$cost_list key=seller_name  item=row}
-      <p>
+      <h2>
           {l s="Shipped by" d="Modules.Shoppygomarketplaceshipping.Shop"}
-        :{$seller_name}  ({$row.seller_products.summary_string})
-      </p>
+        :{$seller_name} ({$row.seller_products.summary_string})
+      </h2>
         {foreach from=$row.seller_products.products item=product}
             {include file='module:shoppygomarketplaceshipping/views/templates/hook/_partials/cart-summary-product-line.tpl'
             product=$product}
         {/foreach}
 
         {foreach from=$row['carrier_costs'] key=carrier_name item=total}
-          <p>{l s="Carrier name" d="Modules.Shoppygomarketplaceshipping.Shop"}
+          <p class="lead">
+              {l s="Carrier name"
+              d="Modules.Shoppygomarketplaceshipping.Shop"}
               {$carrier_name}
             - {l s="Cost" d="Modules.Shoppygomarketplaceshipping.Shop"}:
               {Tools::displayPrice($total)}
           </p>
         {/foreach}
+      <h3>{l s="Return Policy of  %seller_name%"
+          sprintf=['%seller_name%'=>$seller_name]
+          d="Modules.Shoppygomarketplaceshipping.Shop"}</h3>
+      <p>
+          {$policies[$seller_name]}
+      </p>
     {/foreach}
 </div>
 
-<caption>i costi esposti sopra sono relativi alle singole spedizioni di ogni
-  venditore
-</caption>
+<p class="lead">
+  {l
+  s="The costs shown above are related to the individual shipments of each seller"
+  d="Modules.Shoppygomarketplaceshipping.Shop"}
+
+</p>
