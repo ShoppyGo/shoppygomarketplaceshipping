@@ -1,12 +1,12 @@
 {
   "name": "shoppygo/marketplaceshipping",
-  "description": "Shipping",
+  "description": "ShoppyGo Marketplace Extend Supplier Data",
   "minimum-stability": "stable",
-  "license": "proprietary",
+  "license": "AFL-3.0",
   "authors": [
     {
-      "name": "Luigi Massa",
-      "email": "lmassa@bwlab.it"
+      "name": "ShoppyGo",
+      "email": "info@shoppygo.io"
     }
   ],
   "type": "prestashop-module",

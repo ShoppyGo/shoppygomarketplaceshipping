@@ -44,7 +44,6 @@ class Shoppygomarketplaceshipping extends CarrierModule
     public $id_carrier;
     protected $config_form = false;
     protected $_hooks = [
-        'displayHeader',
         'actionCarrierUpdate',
         'displayAfterCarrier',
         'actionFrontControllerSetMedia',
