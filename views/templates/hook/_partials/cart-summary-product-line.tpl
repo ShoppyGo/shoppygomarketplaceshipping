@@ -27,10 +27,10 @@
     <a href="{$product.url}" title="{$product.name}">
         {if $product.default_image}
           <img class="media-object" src="{$product.default_image.small.url}"
-               alt="{$product.name}" loading="lazy">
+               alt="{$product.name}" loading="lazy" style="width: 50px">
         {else}
           <img src="{$urls.no_picture_image.bySize.small_default.url}"
-               loading="lazy"/>
+               loading="lazy" style="width: 50px"/>
         {/if}
     </a>
   </div>

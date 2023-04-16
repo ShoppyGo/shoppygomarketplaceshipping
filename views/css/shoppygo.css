@@ -1,0 +1,18 @@
+.shoppygo.container .seller {
+  background: #FAFAFA;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.shoppygo.container h2 {
+  margin-bottom: 20px;
+}
+
+.shoppygo.container > div.general-title {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+
+.shoppygo.container .seller .products {
+  margin-bottom: 20px;
+}

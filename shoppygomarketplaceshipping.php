@@ -47,6 +47,7 @@ class Shoppygomarketplaceshipping extends CarrierModule
         'displayHeader',
         'actionCarrierUpdate',
         'displayAfterCarrier',
+        'actionFrontControllerSetMedia',
     ];
     protected $_carriers = [
         'Marketplace shipping' => 'shoppygomarketplaceshipping',
@@ -129,6 +130,14 @@ class Shoppygomarketplaceshipping extends CarrierModule
         }
     }
 
+    public function hookActionFrontControllerSetMedia()
+    {
+        $this->context->controller->registerStylesheet(
+            $this->name.'-css-'.$this->version,
+            $this->_path.'views/css/shoppygo.css'
+        );
+    }
+
     /**
      * @param $params
      *
@@ -160,7 +169,8 @@ class Shoppygomarketplaceshipping extends CarrierModule
                 $policies[$seller_name] = $service->getMarketplaceSellerData($id_seller)
                     ->getReturnPolicy()
                     ?: $this->trans(
-                        'No return policy. Please contact the Marketplace Support. Thanks in advance', [],
+                        'No return policy. Please contact the Marketplace Support. Thanks in advance',
+                        [],
                         'Modules.Shoppygomarketplaceshipping.Shop'
                     );
             }
@@ -184,11 +194,6 @@ class Shoppygomarketplaceshipping extends CarrierModule
         );
 
         return $this->fetch('module:shoppygomarketplaceshipping/views/templates/hook/displayAfterCarrier.tpl');
-    }
-
-    public function hookDisplayHeader()
-    {
-        $this->context->controller->registerStylesheet($this->name.'-'.$this->version, '/view/css/shoppygo.css');
     }
 
     public function install()
