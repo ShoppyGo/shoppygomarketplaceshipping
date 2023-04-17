@@ -114,7 +114,7 @@ class Shoppygomarketplaceshipping extends CarrierModule
         self::$cost_for_seller = $service->getTotalShippingBySeller($products);
         $total = 0;
         array_walk_recursive(
-            self::$cost_for_seller, static function (int $r) use (&$total) {
+            self::$cost_for_seller, static function (float $r) use (&$total) {
             $total += $r;
         }
         );
