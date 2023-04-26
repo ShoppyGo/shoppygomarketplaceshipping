@@ -28,11 +28,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
-use PrestaShop\PrestaShop\Adapter\Presenter\Cart\CartPresenter;
-use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductListingPresenter;
-use PrestaShop\PrestaShop\Adapter\Product\PriceFormatter;
-use PrestaShop\PrestaShop\Adapter\Product\ProductColorsRetriever;
 use PrestaShop\PrestaShop\Core\Product\ProductPresentationSettings;
 use ShoppyGo\MarketplaceBundle\Presenter\MarketplaceCartPresenter;
 
@@ -165,8 +160,10 @@ class Shoppygomarketplaceshipping extends CarrierModule
             $seller_name = $service->getSellerName($id_seller);
 
             if (false === array_key_exists($seller_name, $policies)) {
-                $policies[$seller_name] = $service->getMarketplaceSellerData($id_seller)
-                    ->getReturnPolicy()
+                $policies[$seller_name] = $service->getMarketplaceSellerData(
+                    $id_seller
+                )
+                    ?->getReturnPolicy()
                     ?: $this->trans(
                         'No return policy. Please contact the Marketplace Support. Thanks in advance',
                         [],
